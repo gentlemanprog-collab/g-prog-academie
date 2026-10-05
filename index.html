@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>G PROG ACADEMIE</title>
+<meta name="description" content="G PROG ACADEMIE, organisme de formation : installer et contrôler un système de conversion au superéthanol E85. 14 heures en présentiel, dans votre atelier.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout : fiche d'atelier. Bandeau titre + fiche technique, puis sections en colonnes "étiquette | contenu" comme un ordre de réparation. */
+:root{
+  --paper:#F3F5F4; --surface:#FFFFFF; --ink:#14202A; --muted:#55626D; --line:#D3D9DA;
+  --amber:#B86E00; --amber-soft:#F6E7CF; --steel:#18303F; --on-steel:#EEF3F5; --steel-muted:#9DB2BE; --car:#2C4A5E; --car-grey:#7D8A93; --glass:#CFDDE4;
+  --f-display:"Archivo","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --wrap:1160px; --gut:clamp(16px,4vw,40px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0E1418; --surface:#141D23; --ink:#E5EAEC; --muted:#97A4AD; --line:#26333C;
+  --amber:#F0A53A; --amber-soft:#2B2113; --steel:#0A1116; --on-steel:#E5EAEC; --steel-muted:#8095A2; --car:#5A7C91; --car-grey:#6A7882; --glass:#22313B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0E1418; --surface:#141D23; --ink:#E5EAEC; --muted:#97A4AD; --line:#26333C;
+  --amber:#F0A53A; --amber-soft:#2B2113; --steel:#0A1116; --on-steel:#E5EAEC; --steel-muted:#8095A2; --car:#5A7C91; --car-grey:#6A7882; --glass:#22313B; color-scheme:dark}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:2px}
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--gut)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.05}
+h2{font-size:clamp(28px,4vw,40px);font-weight:800;font-stretch:88%;letter-spacing:-.01em}
+h3{font-size:19px;font-weight:700;font-stretch:100%;line-height:1.25}
+p{margin:0}
+.label{font:700 12px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.skip{position:absolute;left:-9999px}.skip:focus{left:16px;top:16px;z-index:99;background:var(--surface);padding:8px 12px}
+
+/* En-tête */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--steel);color:var(--on-steel);border-bottom:3px solid var(--amber)}
+.top .wrap{display:flex;align-items:center;gap:24px;min-height:60px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:800 18px/1 var(--f-display);font-stretch:112%;letter-spacing:.01em;white-space:nowrap}
+.brand-mark{display:grid;place-items:center;width:30px;height:30px;border:2px solid var(--amber);border-radius:50%;font:700 10px/1 var(--f-mono);color:var(--amber)}
+.nav{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav a{text-decoration:none;font-weight:600;font-size:14px;padding:8px 10px;border-radius:4px;color:var(--steel-muted)}
+.nav a:hover{color:var(--on-steel);background:rgba(255,255,255,.06)}
+.nav .cta-nav{color:var(--steel);background:var(--amber);margin-left:6px}
+.nav .cta-nav:hover{color:var(--steel);background:var(--amber);filter:brightness(1.08)}
+.menu-btn{display:none;margin-left:auto;background:none;border:1px solid var(--steel-muted);color:var(--on-steel);border-radius:4px;padding:6px 10px;font:600 14px var(--f-body);cursor:pointer}
+@media (max-width:900px){
+  .menu-btn{display:block}
+  .nav{display:none;position:absolute;left:0;right:0;top:100%;background:var(--steel);flex-direction:column;padding:8px var(--gut) 16px;border-bottom:3px solid var(--amber)}
+  .nav.open{display:flex}.nav .cta-nav{margin:6px 0 0;text-align:center}
+}
+
+/* Bandeau titre */
+.hero{background:var(--steel);color:var(--on-steel);padding-block:clamp(40px,7vw,80px) 0;position:relative;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(28px,5vw,64px);align-items:end}
+.hero .label{color:var(--amber)}
+.hero h1{font-size:clamp(32px,5vw,62px);overflow-wrap:break-word;hyphens:auto;font-weight:900;font-stretch:72%;letter-spacing:-.005em;text-transform:uppercase;margin:16px 0 20px;line-height:.95}
+.hero h1 em{font-style:normal;color:var(--amber)}
+.lede{font-size:18px;max-width:58ch;color:var(--steel-muted)}
+.lede strong{color:var(--on-steel);font-weight:600}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:700;font-size:15px;padding:13px 20px;border-radius:4px;border:2px solid var(--amber)}
+.btn-primary{background:var(--amber);color:var(--steel)}
+.btn-ghost{color:var(--on-steel);border-color:var(--steel-muted)}
+.btn:hover{filter:brightness(1.08)}
+.hero-left{padding-bottom:clamp(40px,6vw,72px);min-width:0}
+@media (max-width:900px){.hero-grid{grid-template-columns:1fr}.hero-left{padding-bottom:8px}.spec .row{grid-template-columns:104px minmax(0,1fr)}}
+
+/* Fiche technique (carte) */
+.spec{background:var(--surface);color:var(--ink);border-radius:6px 6px 0 0;padding:24px 24px 8px;position:relative;min-width:0}
+.spec-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-bottom:16px;border-bottom:2px solid var(--ink)}
+.spec-head h2{font-size:22px;font-stretch:100%;text-transform:uppercase}
+.e85{flex:none;width:76px;height:76px;border-radius:50%;border:4px solid var(--ink);display:grid;place-items:center;font:900 24px/1 var(--f-display);font-stretch:85%;position:relative}
+.e85::after{content:"";position:absolute;inset:4px;border-radius:50%;border:1.5px solid var(--ink)}
+.spec dl{margin:0}
+.spec .row{display:grid;grid-template-columns:120px minmax(0,1fr);gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+.spec .row:last-child{border-bottom:0}
+.spec dt{font:700 11.5px/1.5 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.spec dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.spec dd small{display:block;font-weight:400;color:var(--muted);font-size:13.5px}
+.big{font:800 26px/1.1 var(--f-display);font-stretch:90%}
+
+/* Sections */
+section.block{padding-block:clamp(56px,8vw,96px);border-bottom:1px solid var(--line)}
+.sec-head{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px;margin-bottom:40px;align-items:baseline}
+.sec-head p{max-width:62ch;color:var(--muted);margin-top:12px}
+@media (max-width:760px){.sec-head{grid-template-columns:1fr;gap:8px}}
+.sec-num{font:700 13px/1 var(--f-mono);color:var(--amber);letter-spacing:.08em;text-transform:uppercase}
+
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.cols{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:24px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card p,.card li{color:var(--muted)}
+ul.clean{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+ul.clean li{position:relative;padding-left:20px}
+ul.clean li::before{content:"";position:absolute;left:0;top:.62em;width:9px;height:2px;background:var(--amber)}
+
+.objectives{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:8px;counter-reset:obj}
+@media (max-width:760px){.objectives{grid-template-columns:1fr}}
+.objectives li{list-style:none;padding:14px 0 14px 44px;border-top:1px solid var(--line);position:relative;counter-increment:obj}
+.objectives li::before{content:counter(obj);position:absolute;left:0;top:13px;width:28px;height:28px;border-radius:50%;border:2px solid var(--amber);display:grid;place-items:center;font:700 12px/1 var(--f-mono);color:var(--amber)}
+.objectives{padding:0;margin-bottom:0}
+
+/* Programme */
+.days{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:900px){.days{grid-template-columns:1fr}}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;min-width:0}
+.day-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:18px 24px;background:var(--ink);color:var(--paper)}
+.day-head h3{font-size:22px;font-stretch:85%;text-transform:uppercase;font-weight:800}
+.day-head span{font:500 13px var(--f-mono);opacity:.8;font-variant-numeric:tabular-nums}
+details.mod{border-top:1px solid var(--line)}
+details.mod:first-of-type{border-top:0}
+details.mod summary{cursor:pointer;list-style:none;padding:20px 24px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 16px;align-items:start}
+details.mod summary::-webkit-details-marker{display:none}
+details.mod summary .label{grid-column:1}
+details.mod summary h3{grid-column:1}
+details.mod summary .dur{grid-column:2;grid-row:1/span 2;font:700 14px var(--f-mono);color:var(--amber);white-space:nowrap;display:flex;gap:10px;align-items:center}
+details.mod summary .dur::after{content:"+";display:grid;place-items:center;width:24px;height:24px;border:1.5px solid var(--line);border-radius:50%;color:var(--muted);font-size:15px}
+details.mod[open] summary .dur::after{content:"−"}
+.mod-body{padding:0 24px 22px;display:grid;gap:14px}
+.mod-body .obj{color:var(--muted)}
+.mod-body ol{margin:0;padding-left:20px;display:grid;gap:6px}
+.mod-body .eval{font-size:14px;background:var(--amber-soft);border-radius:4px;padding:10px 12px}
+.timeline-note{margin-top:20px;color:var(--muted);font-size:14.5px}
+
+/* Bande déroulé */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:st;margin:0;padding:0}
+@media (max-width:900px){.steps{grid-template-columns:1fr}}
+.steps li{list-style:none;padding:20px 20px 20px 0;border-top:3px solid var(--line);counter-increment:st;min-width:0}
+.steps li:first-child{border-top-color:var(--amber)}
+.steps li::before{content:"Étape " counter(st);display:block;font:700 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
+.steps h3{font-size:17px;margin-bottom:6px}
+.steps p{color:var(--muted);font-size:14.5px}
+@media (max-width:900px){.steps li{padding:16px 0}}
+
+.split{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+@media (max-width:900px){.split{grid-template-columns:1fr}}
+
+/* Tarif */
+.price{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px;background:var(--steel);color:var(--on-steel);border-radius:6px;padding:clamp(24px,4vw,40px);margin-top:24px}
+@media (max-width:760px){.price{grid-template-columns:1fr}}
+.price .label{color:var(--amber)}
+.price .amount{font:900 clamp(44px,7vw,64px)/1 var(--f-display);font-stretch:80%;margin:10px 0 6px;font-variant-numeric:tabular-nums}
+.price .amount small{font-size:.38em;font-weight:700;font-stretch:100%;margin-left:6px}
+.price p,.price li{color:var(--steel-muted)}
+
+/* Formateur */
+.trainer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:40px}
+@media (max-width:900px){.trainer{grid-template-columns:1fr}}
+.idcard{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:28px;display:grid;gap:14px;align-content:start}
+.mono-av{width:64px;height:64px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font:800 22px var(--f-display);font-stretch:90%}
+.xp{margin:0;padding:0;list-style:none}
+.xp li{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:14px 0;border-top:1px solid var(--line)}
+.xp li:last-child{border-bottom:1px solid var(--line)}
+.xp time{font:700 13px var(--f-mono);color:var(--amber);font-variant-numeric:tabular-nums;padding-top:2px}
+.xp p{color:var(--muted);font-size:14.5px}
+
+/* Indicateurs */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.kpis{grid-template-columns:1fr}}
+.kpi{border-top:3px solid var(--ink);padding-top:16px;display:grid;gap:6px}
+.kpi .v{font:900 40px/1 var(--f-display);font-stretch:80%;font-variant-numeric:tabular-nums}
+.kpi .v.pending{font-size:22px;font-stretch:90%;font-weight:800;line-height:1.15;color:var(--muted)}
+.kpi p{color:var(--muted);font-size:14.5px}
+.updated{margin-top:24px;font-size:13.5px;color:var(--muted)}
+
+/* Contact */
+.contact{background:var(--steel);color:var(--on-steel);border-bottom:0}
+.contact .sec-num{color:var(--amber)}
+.contact .sec-head p{color:var(--steel-muted)}
+.contact-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.contact-grid{grid-template-columns:1fr}}
+.cbox{border:1px solid rgba(157,178,190,.35);border-radius:6px;padding:22px;display:grid;gap:8px;align-content:start;min-width:0}
+.cbox .label{color:var(--steel-muted)}
+.cbox a,.cbox .val{font:700 20px/1.3 var(--f-display);font-stretch:95%;text-decoration:none;overflow-wrap:anywhere}
+.cbox a:hover{color:var(--amber)}
+.cbox p{color:var(--steel-muted);font-size:14.5px}
+
+/* Illustrations voiture */
+.car-body{fill:var(--car)}.car-win{fill:var(--glass)}.car-wheel{fill:var(--ink);stroke:var(--surface);stroke-width:6}.car-hub{fill:var(--line)}.car-ground{stroke:var(--line);stroke-width:2}
+.anat{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:clamp(16px,3vw,32px);overflow-x:auto}
+.anat svg{display:block;width:100%;min-width:560px;height:auto}
+.anat .call{stroke:var(--amber);stroke-width:1.5;fill:none}
+.anat .dot{fill:var(--amber)}
+.anat .harness{stroke:var(--amber);stroke-width:3;fill:none;stroke-dasharray:6 5}
+.anat text{font:600 13px var(--f-body);fill:var(--ink)}
+.anat text.sub{font:500 11px var(--f-mono);fill:var(--muted);letter-spacing:.04em}
+.anat-legend{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:20px}
+@media (max-width:760px){.anat-legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.anat-legend p{font-size:14px;color:var(--muted)}.anat-legend strong{display:block;color:var(--ink)}
+
+/* Avant / après */
+.ba{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:760px){.ba{grid-template-columns:1fr}}
+.ba-card{border-radius:6px;padding:24px;display:grid;gap:14px;align-content:start;border:1px solid var(--line);background:var(--surface);min-width:0}
+.ba-card.after{border:2px solid var(--amber)}
+.ba-card svg{width:100%;height:auto;display:block}
+.ba-card.before{--car:var(--car-grey)}
+.ba-card.after{--car:var(--amber)}
+.ba-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tag{font:700 12px var(--f-mono);letter-spacing:.06em;padding:5px 9px;border-radius:3px;background:var(--paper);border:1px solid var(--line)}
+.after .tag{background:var(--amber);color:var(--steel);border-color:var(--amber)}
+.ba-fig{font:900 48px/1 var(--f-display);font-stretch:80%;font-variant-numeric:tabular-nums}
+.ba-fig small{font-size:.36em;font-weight:700;font-stretch:100%;color:var(--muted);margin-left:6px}
+.ba-rows{display:grid;gap:6px;font-size:14.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ba-rows div{display:flex;justify-content:space-between;gap:12px;border-top:1px dashed var(--line);padding-top:6px}
+.ba-rows b{color:var(--ink)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:32px;margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:clamp(20px,3vw,32px)}
+@media (max-width:900px){.calc{grid-template-columns:1fr}}
+.calc form{display:grid;gap:14px}
+.calc label{display:grid;gap:4px;font-size:14px;font-weight:600}
+.calc input{font:600 16px var(--f-mono);padding:9px 10px;border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:14px;align-content:start}
+.bar-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:center}
+.bar-row span{font:700 12px var(--f-mono);color:var(--muted)}
+.bar-track{position:relative;height:38px;background:var(--paper);border-radius:3px}
+.bar{position:absolute;inset:0 auto 0 0;border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font:700 14px var(--f-mono);min-width:max-content;font-variant-numeric:tabular-nums}
+.bar.sp{background:var(--car-grey);color:var(--surface)}
+.bar.e85{background:var(--amber);color:var(--steel)}
+.saving{font:900 clamp(36px,6vw,56px)/1 var(--f-display);font-stretch:80%;color:var(--amber);font-variant-numeric:tabular-nums}
+.src{font-size:13px;color:var(--muted);margin-top:16px;max-width:90ch}
+.src a{color:var(--muted)}
+
+/* Galerie (illustrations remplaçables par des photos) */
+.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.gallery{grid-template-columns:1fr}}
+.gallery figure{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.gallery .shot{aspect-ratio:4/3;background:var(--steel);display:grid;place-items:center;max-width:100%}
+.gallery .shot svg,.gallery .shot img{width:100%;height:100%;display:block;object-fit:cover}
+.gallery figcaption{padding:16px 18px;display:grid;gap:4px}
+.gallery figcaption strong{font-size:16px}
+.gallery figcaption span{color:var(--muted);font-size:14px}
+.ill-box{fill:#2A3A45}.ill-box2{fill:#33474F}.ill-edge{fill:none;stroke:#4E6672;stroke-width:2}
+.ill-amber{fill:var(--amber)}.ill-amber-s{stroke:var(--amber);fill:none}
+.ill-wire{fill:none;stroke-linecap:round}
+.ill-metal{fill:#8C9AA3}.ill-metal2{fill:#B6C1C7}.ill-dark{fill:#0F181E}
+.ill-txt{font:700 14px var(--f-mono);fill:#EEF3F5;letter-spacing:.06em}
+.ill-txt-s{font:500 11px var(--f-mono);fill:#9DB2BE}
+.ill-screen{fill:#0B1418}
+.ill-green{fill:#4FB477}
+
+/* Pied de page */
+footer{background:var(--paper);padding-block:40px 56px;font-size:14px;color:var(--muted)}
+.foot-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:32px}
+@media (max-width:760px){.foot-grid{grid-template-columns:1fr}}
+footer details{border-top:1px solid var(--line)}
+footer details:last-of-type{border-bottom:1px solid var(--line)}
+footer summary{cursor:pointer;padding:14px 0;font-weight:700;color:var(--ink)}
+footer .legal{padding:0 0 18px;display:grid;gap:10px;max-width:75ch}
+footer .legal h4{margin:8px 0 0;color:var(--ink);font-size:14px}
+.todo{background:var(--amber-soft);color:var(--ink);padding:0 4px;border-radius:3px}
+</style>
+
+</head>
+<body>
+<a class="skip" href="#formation">Aller au contenu</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="car" viewBox="0 0 580 210">
+    <line class="car-ground" x1="0" y1="190" x2="580" y2="190"/>
+    <path class="car-body" d="M18,160 L16,128 Q18,110 40,104 L120,94 Q160,58 200,44 Q230,34 280,33 L360,34 Q400,38 430,62 L470,94 L530,104 Q560,110 562,132 L562,160 Q560,168 548,168 L520,168 A52,52 0 0 0 416,168 L172,168 A52,52 0 0 0 68,168 L30,168 Q18,168 18,160 Z"/>
+    <path class="car-win" d="M150,96 Q180,64 210,54 Q232,47 270,46 L276,46 L276,96 Z"/>
+    <path class="car-win" d="M290,46 L355,47 Q388,50 410,68 L438,96 L290,96 Z"/>
+    <circle class="car-wheel" cx="120" cy="166" r="40"/><circle class="car-hub" cx="120" cy="166" r="15"/>
+    <circle class="car-wheel" cx="468" cy="166" r="40"/><circle class="car-hub" cx="468" cy="166" r="15"/>
+  </symbol>
+</svg>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="G PROG ACADEMIE, accueil"><span class="brand-mark" aria-hidden="true">E85</span>G PROG ACADEMIE</a>
+    <button class="menu-btn" id="menu-btn" aria-expanded="false" aria-controls="nav">Menu</button>
+    <nav class="nav" id="nav" aria-label="Navigation principale">
+      <a href="#formation">La formation</a>
+      <a href="#programme">Programme</a>
+      <a href="#acces">Inscription et tarif</a>
+      <a href="#economies">Économies</a>
+      <a href="#handicap">Accessibilité</a>
+      <a class="cta-nav" href="#contact">Nous contacter</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-left">
+        <p class="label">Organisme de formation · Professionnels de l'automobile</p>
+        <h1>Installer et contrôler un système de conversion au <em>superéthanol E85</em></h1>
+        <p class="lede">Deux jours sur véhicule, dans votre atelier, avec un formateur qui pose des boîtiers E85 au quotidien. <strong>Vous repartez capable de vérifier l'éligibilité d'un véhicule, poser et paramétrer un kit homologué, puis diagnostiquer et corriger les anomalies.</strong></p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#contact">Demander une inscription</a>
+          <a class="btn btn-ghost" href="#programme">Voir le programme détaillé</a>
+        </div>
+      </div>
+
+      <aside class="spec" aria-labelledby="spec-title">
+        <div class="spec-head">
+          <div>
+            <p class="label">Fiche formation</p>
+            <h2 id="spec-title">Conversion E85</h2>
+          </div>
+          <div class="e85" aria-label="Repère carburant E85">E85</div>
+        </div>
+        <dl>
+          <div class="row"><dt>Durée</dt><dd><span class="big">14 h</span><small>2 jours de 7 h · 9 h 00-12 h 30 et 13 h 30-17 h 00</small></dd></div>
+          <div class="row"><dt>Format</dt><dd>Présentiel, intra-entreprise<small>La formation se déroule chez vous, dans votre atelier</small></dd></div>
+          <div class="row"><dt>Effectif</dt><dd>1 à 4 stagiaires par session</dd></div>
+          <div class="row"><dt>Tarif</dt><dd>1 200 € HT par stagiaire<small>soit 1 440 € TTC</small></dd></div>
+          <div class="row"><dt>Délai d'accès</dt><dd>14 jours minimum<small>entre l'inscription et le début de la formation</small></dd></div>
+          <div class="row"><dt>Prochaine session</dt><dd>14 et 15 décembre 2026</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+
+  <section class="block" id="formation">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">La formation</p>
+        <div>
+          <h2>Ajouter la conversion E85 à vos prestations d'atelier</h2>
+          <p>Le superéthanol E85 coûte nettement moins cher à la pompe que le SP95. De plus en plus de conducteurs demandent la pose d'un boîtier homologué. Cette formation donne à vos techniciens la méthode complète, du diagnostic préalable à la remise du véhicule au client.</p>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <p class="label">Public visé</p>
+          <h3>Professionnels de l'automobile</h3>
+          <p>Mécaniciens, techniciens et garagistes qui entretiennent des véhicules légers et veulent proposer la conversion E85 à leurs clients.</p>
+        </div>
+        <div class="card">
+          <p class="label">Prérequis</p>
+          <h3>Aucun prérequis nécessaire</h3>
+          <p>La formation est ouverte sans diplôme ni expérience exigés. Un test de positionnement permet d'adapter la formation à votre niveau.</p>
+        </div>
+        <div class="card">
+          <p class="label">Méthode</p>
+          <h3>Théorie courte, pratique sur véhicule</h3>
+          <p>Apports techniques, démonstrations par le formateur, puis mises en pratique individuelles sur véhicules à injection directe et indirecte.</p>
+        </div>
+      </div>
+
+      <div class="sec-head" style="margin:56px 0 8px">
+        <p class="sec-num">Objectifs</p>
+        <h3 style="font-size:22px">À l'issue de la formation, vous serez capable de :</h3>
+      </div>
+      <ol class="objectives">
+        <li>Expliquer le fonctionnement du superéthanol E85 et ses incidences sur le moteur.</li>
+        <li>Diagnostiquer l'éligibilité technique d'un véhicule avant conversion.</li>
+        <li>Installer un système de conversion E85 homologué dans les règles de l'art.</li>
+        <li>Paramétrer le système selon la motorisation et le type d'injection.</li>
+        <li>Contrôler le fonctionnement après pose à l'aide des outils de diagnostic.</li>
+        <li>Identifier les anomalies liées à l'installation et appliquer la correction adaptée.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" id="vehicule">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">Sur le véhicule</p>
+        <div>
+          <h2>Ce que vous apprenez à poser et à régler</h2>
+          <p>Un kit de conversion homologué se branche entre le calculateur d'origine et les injecteurs. Il allonge les temps d'injection selon la teneur en éthanol, en s'appuyant sur la température moteur et la sonde lambda.</p>
+        </div>
+      </div>
+      <div class="anat" role="img" aria-label="Schéma d'une voiture avec l'emplacement du boîtier de conversion, des injecteurs, de la sonde lambda et du réservoir">
+        <svg viewBox="0 0 760 310" aria-hidden="true">
+          <use href="#car" x="90" y="20" width="580" height="210"/>
+          <path class="harness" d="M612,150 C600,135 585,128 568,126"/>
+          <circle class="dot" cx="568" cy="126" r="6"/><path class="call" d="M568,126 L620,44 L752,44"/>
+          <text x="626" y="36">Injecteurs</text><text class="sub" x="626" y="62">temps d'injection</text>
+          <circle class="dot" cx="612" cy="150" r="7"/><path class="call" d="M612,150 L520,24 L340,24"/>
+          <text x="340" y="12">Boîtier de conversion</text><text class="sub" x="340" y="38">paramétrage selon moteur</text>
+          <circle class="dot" cx="640" cy="172" r="6"/><path class="call" d="M640,172 L680,262 L752,262"/>
+          <text x="600" y="282">Sonde de température</text><text class="sub" x="600" y="302">démarrage à froid</text>
+          <circle class="dot" cx="400" cy="200" r="6"/><path class="call" d="M400,200 L400,262 L330,262"/>
+          <text x="300" y="282">Sonde lambda</text><text class="sub" x="300" y="302">contrôle de la richesse</text>
+          <circle class="dot" cx="250" cy="165" r="6"/><path class="call" d="M250,165 L150,262 L20,262"/>
+          <text x="20" y="282">Réservoir</text><text class="sub" x="20" y="302">E85, essence ou mélange</text>
+        </svg>
+      </div>
+      <div class="anat-legend">
+        <p><strong>Diagnostic préalable</strong>Lecture OBD, état des injecteurs et de la pompe.</p>
+        <p><strong>Pose du faisceau</strong>Connexion aux injecteurs et aux capteurs.</p>
+        <p><strong>Paramétrage</strong>Selon le nombre de cylindres et le type d'injection.</p>
+        <p><strong>Contrôle</strong>Richesse, corrections moteur et essai.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="galerie">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">En atelier</p>
+        <div>
+          <h2>Le matériel que vous aurez en main</h2>
+          <p>Pendant les travaux pratiques, chaque stagiaire pose lui-même le boîtier, branche le faisceau sur les injecteurs et paramètre le système avec la valise de diagnostic.</p>
+        </div>
+      </div>
+      <div class="gallery">
+        <!-- PHOTO 1 : pour mettre une vraie photo, remplacer tout le bloc <svg>...</svg> ci-dessous par :
+             <img src="images/boitier.jpg" alt="Boîtier de conversion E85 posé dans un compartiment moteur"> -->
+        <figure>
+          <div class="shot">
+            <svg viewBox="0 0 400 300" role="img" aria-label="Illustration d'un boîtier de conversion E85">
+              <rect x="0" y="0" width="400" height="300" fill="var(--steel)"/>
+              <path class="ill-wire" d="M120,175 C70,180 50,230 20,250" stroke="#11181D" stroke-width="16"/>
+              <path class="ill-wire" d="M120,175 C70,180 50,230 20,250" stroke="#3B4C56" stroke-width="10"/>
+              <path class="ill-wire" d="M120,175 C70,180 50,230 20,250" stroke="var(--amber)" stroke-width="2" stroke-dasharray="10 8"/>
+              <rect x="115" y="160" width="26" height="34" rx="3" class="ill-dark"/>
+              <rect x="130" y="80" width="190" height="150" rx="14" class="ill-box"/>
+              <rect x="130" y="80" width="190" height="150" rx="14" class="ill-edge"/>
+              <rect x="150" y="70" width="18" height="14" rx="2" class="ill-metal"/><rect x="282" y="70" width="18" height="14" rx="2" class="ill-metal"/>
+              <rect x="150" y="226" width="18" height="14" rx="2" class="ill-metal"/><rect x="282" y="226" width="18" height="14" rx="2" class="ill-metal"/>
+              <g opacity=".35"><rect x="148" y="98" width="154" height="4" rx="2" fill="#5D7480"/><rect x="148" y="106" width="154" height="4" rx="2" fill="#5D7480"/></g>
+              <rect x="160" y="125" width="130" height="60" rx="6" class="ill-box2"/>
+              <circle cx="190" cy="155" r="20" fill="none" stroke="#EEF3F5" stroke-width="3"/>
+              <text x="190" y="160" text-anchor="middle" class="ill-txt" style="font-size:12px">E85</text>
+              <text x="222" y="150" class="ill-txt" style="font-size:12px">FLEX</text>
+              <text x="222" y="166" class="ill-txt-s">4 CYL</text>
+              <circle cx="300" cy="205" r="5" class="ill-green"/>
+              <circle cx="300" cy="205" r="10" fill="#4FB477" opacity=".25"/>
+              <text x="200" y="275" text-anchor="middle" class="ill-txt-s">BOÎTIER DE CONVERSION · CONNECTEUR FAISCEAU</text>
+            </svg>
+          </div>
+          <figcaption><strong>Le boîtier de conversion</strong><span>Fixé à l'abri de la chaleur, il ajuste l'injection selon le taux d'éthanol.</span></figcaption>
+        </figure>
+
+        <!-- PHOTO 2 : remplacer le bloc <svg>...</svg> par
+             <img src="images/faisceau-injecteurs.jpg" alt="Faisceau du kit E85 branché sur les injecteurs"> -->
+        <figure>
+          <div class="shot">
+            <svg viewBox="0 0 400 300" role="img" aria-label="Illustration du faisceau branché sur les quatre injecteurs">
+              <rect x="0" y="0" width="400" height="300" fill="var(--steel)"/>
+              <rect x="40" y="190" width="320" height="70" rx="8" fill="#1F2C34"/>
+              <rect x="40" y="190" width="320" height="10" fill="#26353E"/>
+              <rect x="40" y="128" width="320" height="22" rx="11" class="ill-metal"/>
+              <rect x="40" y="128" width="320" height="7" rx="3" class="ill-metal2"/>
+              <g id="inj">
+                <rect x="78" y="150" width="24" height="46" rx="4" fill="#2E3D46"/>
+                <rect x="84" y="196" width="12" height="16" class="ill-metal"/>
+                <rect x="72" y="96" width="36" height="30" rx="5" class="ill-dark"/>
+                <rect x="78" y="88" width="24" height="10" rx="2" fill="#11181D"/>
+              </g>
+              <use href="#inj" x="76"/><use href="#inj" x="152"/><use href="#inj" x="228"/>
+              <path class="ill-wire" d="M90,88 C90,50 150,40 200,40 C250,40 310,50 318,88" stroke="#11181D" stroke-width="9"/>
+              <path class="ill-wire" d="M166,88 C166,60 180,48 200,44 M242,88 C242,60 225,48 205,44" stroke="#11181D" stroke-width="7"/>
+              <path class="ill-wire" d="M200,40 L200,10" stroke="#11181D" stroke-width="12"/>
+              <path class="ill-wire" d="M90,88 C90,50 150,40 200,40 C250,40 310,50 318,88 M200,40 L200,10" stroke="var(--amber)" stroke-width="2" stroke-dasharray="8 7"/>
+              <g fill="var(--amber)"><rect x="80" y="104" width="20" height="5" rx="2"/><rect x="156" y="104" width="20" height="5" rx="2"/><rect x="232" y="104" width="20" height="5" rx="2"/><rect x="308" y="104" width="20" height="5" rx="2"/></g>
+              <text x="200" y="285" text-anchor="middle" class="ill-txt-s">RAMPE D'INJECTION · 4 INJECTEURS · CONNECTEURS INTERCALÉS</text>
+            </svg>
+          </div>
+          <figcaption><strong>Le faisceau sur les injecteurs</strong><span>Les connecteurs s'intercalent sans couper le câblage d'origine.</span></figcaption>
+        </figure>
+
+        <!-- PHOTO 3 : remplacer le bloc <svg>...</svg> par
+             <img src="images/diagnostic.jpg" alt="Paramétrage du kit E85 avec une valise de diagnostic"> -->
+        <figure>
+          <div class="shot">
+            <svg viewBox="0 0 400 300" role="img" aria-label="Illustration d'une valise de diagnostic affichant les paramètres moteur">
+              <rect x="0" y="0" width="400" height="300" fill="var(--steel)"/>
+              <rect x="40" y="40" width="250" height="180" rx="14" fill="#1A252C"/>
+              <rect x="40" y="40" width="250" height="180" rx="14" class="ill-edge"/>
+              <rect x="56" y="56" width="218" height="148" rx="4" class="ill-screen"/>
+              <text x="68" y="78" class="ill-txt-s">DONNÉES MOTEUR · EN DIRECT</text>
+              <text x="68" y="104" class="ill-txt" style="font-size:12px">Richesse</text><text x="262" y="104" text-anchor="end" class="ill-txt" style="font-size:12px">λ 1,00</text>
+              <text x="68" y="126" class="ill-txt" style="font-size:12px">Corr. LT</text><text x="262" y="126" text-anchor="end" class="ill-txt" style="font-size:12px">+2,3 %</text>
+              <text x="68" y="148" class="ill-txt" style="font-size:12px">T. inj.</text><text x="262" y="148" text-anchor="end" class="ill-txt" style="font-size:12px">3,8 ms</text>
+              <polyline points="68,190 92,182 116,186 140,174 164,178 188,170 212,175 236,168 262,172" fill="none" stroke="var(--amber)" stroke-width="2.5"/>
+              <path class="ill-wire" d="M290,170 C330,170 330,240 350,250" stroke="#11181D" stroke-width="8"/>
+              <rect x="330" y="244" width="50" height="34" rx="5" class="ill-dark"/>
+              <rect x="338" y="252" width="34" height="18" rx="2" fill="#2E3D46"/>
+              <text x="355" y="236" text-anchor="middle" class="ill-txt-s">OBD</text>
+              <text x="165" y="255" text-anchor="middle" class="ill-txt-s">VALEURS D'EXEMPLE</text>
+            </svg>
+          </div>
+          <figcaption><strong>Le paramétrage et le contrôle</strong><span>Lecture de la richesse, des corrections et des temps d'injection.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="economies">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">Avant / après</p>
+        <div>
+          <h2>Ce que la conversion fait gagner à vos clients</h2>
+          <p>L'E85 se consomme un peu plus que l'essence, jusqu'à 25 % selon le ministère de l'Agriculture. Mais il coûte moins de la moitié du prix à la pompe. Exemple pour une citadine qui consomme 6,5 L/100 km en SP95-E10, aux prix moyens nationaux du 4 octobre 2026.</p>
+        </div>
+      </div>
+
+      <div class="ba">
+        <div class="ba-card before">
+          <div class="ba-top"><p class="label">Avant la conversion</p><span class="tag">SP95-E10</span></div>
+          <svg viewBox="0 0 580 210" aria-hidden="true"><use href="#car"/></svg>
+          <p class="ba-fig">14,44 €<small>/ 100 km</small></p>
+          <div class="ba-rows">
+            <div>Consommation <b>6,5 L/100 km</b></div>
+            <div>Prix moyen du litre <b>2,221 €</b></div>
+            <div>Plein de 50 litres <b>111,05 €</b></div>
+          </div>
+        </div>
+        <div class="ba-card after">
+          <div class="ba-top"><p class="label">Après la conversion</p><span class="tag">E85</span></div>
+          <svg viewBox="0 0 580 210" aria-hidden="true"><use href="#car"/></svg>
+          <p class="ba-fig">7,34 €<small>/ 100 km</small></p>
+          <div class="ba-rows">
+            <div>Consommation (+25 %) <b>8,1 L/100 km</b></div>
+            <div>Prix moyen du litre <b>0,903 €</b></div>
+            <div>Plein de 50 litres <b>45,15 €</b></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="calc">
+        <form id="calc" aria-labelledby="calc-title">
+          <h3 id="calc-title">Faites le calcul pour un client</h3>
+          <label for="c-km">Kilomètres par an<input id="c-km" type="number" inputmode="numeric" min="0" step="500" value="15000"></label>
+          <label for="c-conso">Consommation en essence (L/100 km)<input id="c-conso" type="number" inputmode="decimal" min="0" step="0.1" value="6.5"></label>
+          <label for="c-sp">Prix du SP95-E10 (€/L)<input id="c-sp" type="number" inputmode="decimal" min="0" step="0.001" value="2.221"></label>
+          <label for="c-e85">Prix de l'E85 (€/L)<input id="c-e85" type="number" inputmode="decimal" min="0" step="0.001" value="0.903"></label>
+          <label for="c-over">Surconsommation E85 (%)<input id="c-over" type="number" inputmode="numeric" min="0" max="60" step="1" value="25"></label>
+        </form>
+        <div class="bars" aria-live="polite">
+          <p class="label">Budget carburant sur un an</p>
+          <div class="bar-row"><span>SP95-E10</span><div class="bar-track"><div class="bar sp" id="b-sp" style="width:100%">2 166 €</div></div></div>
+          <div class="bar-row"><span>E85</span><div class="bar-track"><div class="bar e85" id="b-e85" style="width:51%">1 101 €</div></div></div>
+          <p class="label" style="margin-top:12px">Économie estimée</p>
+          <p class="saving" id="c-save">1 065 € / an</p>
+          <p style="color:var(--muted);font-size:14.5px">Hors coût du boîtier et de la pose. Le gain réel dépend du véhicule, de la conduite et des prix locaux.</p>
+        </div>
+      </div>
+      <p class="src">Exemple chiffré, non contractuel. Prix moyens nationaux relevés le 4 octobre 2026 par <a href="https://carbuprix.fr/barometre/" target="_blank" rel="noopener">CarbuPrix</a> à partir des données publiques <a href="https://www.prix-carburants.gouv.fr" target="_blank" rel="noopener">prix-carburants.gouv.fr</a>. Surconsommation maximale de 25 % : <a href="https://agriculture.gouv.fr/les-secrets-du-superethanol-e85" target="_blank" rel="noopener">ministère de l'Agriculture</a>.</p>
+    </div>
+  </section>
+
+  <section class="block" id="programme">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">Programme</p>
+        <div>
+          <h2>4 modules, 2 jours, 14 heures</h2>
+          <p>Le premier jour pose les bases et le diagnostic d'éligibilité. Le second est consacré à l'installation, au paramétrage et au contrôle sur véhicule. Chaque module se termine par une évaluation.</p>
+        </div>
+      </div>
+
+      <div class="days">
+        <div class="day">
+          <div class="day-head"><h3>Jour 1</h3><span>Comprendre et diagnostiquer · 7 h</span></div>
+
+          <details class="mod" open>
+            <summary><span class="label">Module 1</span><h3>Maîtriser le fonctionnement d'un système de conversion E85</h3><span class="dur">3 h 30</span></summary>
+            <div class="mod-body">
+              <p class="obj">Analyser le fonctionnement d'un système de conversion E85 et ses interactions avec les composants du véhicule.</p>
+              <ol>
+                <li>Caractéristiques techniques du superéthanol E85 et incidences sur le fonctionnement moteur</li>
+                <li>Alimentation essence conventionnelle et alimentation E85 : les différences</li>
+                <li>Composants du circuit d'alimentation et d'injection concernés par la conversion</li>
+                <li>Architecture et fonctionnement d'un système de conversion E85</li>
+                <li>Exigences techniques et réglementaires d'une installation homologuée</li>
+              </ol>
+              <p class="eval"><strong>Évaluation :</strong> questionnaire de validation des connaissances.</p>
+            </div>
+          </details>
+
+          <details class="mod">
+            <summary><span class="label">Module 2</span><h3>Diagnostiquer l'éligibilité technique d'un véhicule</h3><span class="dur">3 h 30</span></summary>
+            <div class="mod-body">
+              <p class="obj">Réaliser un diagnostic préalable pour décider si un véhicule peut être converti.</p>
+              <ol>
+                <li>Identifier la motorisation et le système d'injection du véhicule</li>
+                <li>Contraintes propres à l'injection directe et à l'injection indirecte</li>
+                <li>Contrôler l'état du moteur, de l'injection et du circuit d'alimentation</li>
+                <li>Exploiter une valise de diagnostic OBD et un multimètre</li>
+                <li>Conclure sur l'éligibilité à partir des résultats du diagnostic</li>
+              </ol>
+              <p class="eval"><strong>Évaluation :</strong> étude de cas sur fiches véhicules, décision d'éligibilité justifiée.</p>
+            </div>
+          </details>
+        </div>
+
+        <div class="day">
+          <div class="day-head"><h3>Jour 2</h3><span>Installer et contrôler · 7 h</span></div>
+
+          <details class="mod" open>
+            <summary><span class="label">Module 3</span><h3>Réaliser l'installation et le paramétrage</h3><span class="dur">3 h 30</span></summary>
+            <div class="mod-body">
+              <p class="obj">Installer et paramétrer un système de conversion E85 en respectant les procédures techniques et les règles de sécurité.</p>
+              <ol>
+                <li>Préparer le véhicule et repérer les points de raccordement</li>
+                <li>Lire le schéma électrique pour déterminer les branchements</li>
+                <li>Poser le boîtier, le faisceau, la connectique et les capteurs</li>
+                <li>Paramétrer le système selon la motorisation et le type d'injection</li>
+                <li>Contrôler la conformité du montage avant la mise en route</li>
+              </ol>
+              <p class="eval"><strong>Évaluation :</strong> observation en situation sur grille critériée (procédure, sécurité, qualité des connexions).</p>
+            </div>
+          </details>
+
+          <details class="mod">
+            <summary><span class="label">Module 4</span><h3>Contrôler et diagnostiquer après conversion</h3><span class="dur">3 h 30</span></summary>
+            <div class="mod-body">
+              <p class="obj">Contrôler le système installé, diagnostiquer les anomalies et appliquer les corrections adaptées.</p>
+              <ol>
+                <li>Contrôler les paramètres moteur avec les outils de diagnostic</li>
+                <li>Analyser la richesse, les corrections moteur et les temps d'injection</li>
+                <li>Réaliser les contrôles fonctionnels et interpréter les résultats</li>
+                <li>Diagnostiquer les principales anomalies et en trouver l'origine</li>
+                <li>Corriger, puis valider le fonctionnement du véhicule</li>
+              </ol>
+              <p class="eval"><strong>Évaluation :</strong> contrôle final sur véhicule (analyse des données, anomalie à identifier et corriger).</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="split" style="margin-top:48px">
+        <div class="card">
+          <p class="label">Moyens techniques</p>
+          <ul class="clean">
+            <li>Véhicules d'application à injection directe et indirecte</li>
+            <li>Kits de conversion E85 avec faisceaux, connectiques et boîtiers</li>
+            <li>Valise de diagnostic OBD et multimètre</li>
+            <li>Ordinateur et interfaces de paramétrage</li>
+            <li>Documentation et schémas techniques des véhicules</li>
+            <li>Outillage de mécanique et équipements de protection individuelle</li>
+            <li>Vidéoprojecteur pour les supports pédagogiques</li>
+          </ul>
+        </div>
+        <div class="card">
+          <p class="label">Évaluation et sanction</p>
+          <ul class="clean">
+            <li>Test de positionnement en début de formation</li>
+            <li>Évaluations en continu pendant les travaux pratiques</li>
+            <li>Questionnaire de connaissances à la fin du jour 1</li>
+            <li>Contrôle final pratique sur véhicule à la fin du jour 2</li>
+            <li>Questionnaire de satisfaction en fin de formation</li>
+            <li>Remise d'une attestation de fin de formation et d'un certificat de réalisation</li>
+          </ul>
+          <p style="font-size:14px">Formation non certifiante. Feuille d'émargement signée chaque demi-journée.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="acces">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">Inscription</p>
+        <div>
+          <h2>Modalités et délais d'accès</h2>
+          <p>La formation se déroule dans vos locaux. Nous fixons les dates ensemble, avec un délai minimum de 14 jours entre l'inscription et le premier jour.</p>
+        </div>
+      </div>
+
+      <ol class="steps">
+        <li><h3>Prise de contact</h3><p>Par téléphone ou par e-mail. Nous répondons sous 48 heures.</p></li>
+        <li><h3>Analyse du besoin</h3><p>Un questionnaire vérifie que la formation correspond à votre projet.</p></li>
+        <li><h3>Devis ou convention</h3><p>À retourner signé avec la mention « Bon pour accord ».</p></li>
+        <li><h3>Positionnement</h3><p>Un test permet d'adapter la formation au niveau de chaque stagiaire.</p></li>
+        <li><h3>Convocation</h3><p>Envoyée par e-mail avec le livret d'accueil, au moins 14 jours avant.</p></li>
+      </ol>
+
+      <div class="price">
+        <div>
+          <p class="label">Tarif</p>
+          <p class="amount">1 200 €<small>HT</small></p>
+          <p>par stagiaire, soit 1 440 € TTC</p>
+        </div>
+        <div>
+          <ul class="clean">
+            <li>Formation de 14 heures en présentiel, dans votre atelier</li>
+            <li>Support de formation remis à chaque participant</li>
+            <li>Paiement à réception de la facture</li>
+            <li>Une prise en charge par votre OPCO peut être étudiée lors de l'inscription</li>
+            <li>Conditions d'annulation détaillées dans les conditions générales de vente, en bas de page</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="handicap">
+    <div class="wrap">
+      <div class="sec-head" style="margin-bottom:0">
+        <p class="sec-num">Accessibilité</p>
+        <div>
+          <h2>Personnes en situation de handicap</h2>
+          <p>Formation accessible aux personnes en situation de handicap. Contactez notre référent, Zübeyir ER, pour étudier les adaptations possibles : erzubeyir@icloud.com · 07 58 77 05 95.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block contact" id="contact">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="sec-num">Contact</p>
+        <div>
+          <h2>Parlons de votre projet de formation</h2>
+          <p>Appelez ou écrivez pour une inscription, un devis ou une question sur le programme. Nous répondons sous 48 heures.</p>
+        </div>
+      </div>
+      <div class="contact-grid">
+        <div class="cbox"><p class="label">Téléphone</p><a href="tel:+33758770595">07 58 77 05 95</a><p>Du lundi au vendredi, 9 h 00-18 h 00</p></div>
+        <div class="cbox"><p class="label">E-mail</p><a href="mailto:erzubeyir@icloud.com">erzubeyir@icloud.com</a><p>Inscription, devis, réclamation</p></div>
+        <div class="cbox"><p class="label">Siège</p><span class="val">Lot 17, bâtiment B<br>82 avenue du Château<br>95310 Saint-Ouen-l'Aumône</span><p>La formation a lieu dans vos locaux.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <p style="font:800 18px var(--f-display);font-stretch:112%;color:var(--ink)">G PROG ACADEMIE</p>
+      <p style="margin-top:10px">SASU · SIRET 107 239 642 00013 · Déclaration d'activité enregistrée sous le n° 11951049295 auprès du préfet de la région Île-de-France. Cet enregistrement ne vaut pas agrément de l'État.</p>
+      <p style="margin-top:10px">Médiateur de la consommation : CM2C, 49 rue de Ponthieu, 75008 Paris · 01 89 47 00 14 · <a href="https://www.cm2c.net" target="_blank" rel="noopener">www.cm2c.net</a></p>
+    </div>
+    <div>
+      <details id="mentions">
+        <summary>Mentions légales</summary>
+        <div class="legal">
+          <h4>Éditeur du site</h4>
+          <p>G PROG ACADEMIE, société par actions simplifiée à associé unique, Lot 17, bâtiment B, 82 avenue du Château, 95310 Saint-Ouen-l'Aumône. SIRET 107 239 642 00013. Téléphone : 07 58 77 05 95. E-mail : erzubeyir@icloud.com.</p>
+          <h4>Directeur de la publication</h4>
+          <p>Zübeyir ER, président.</p>
+          <h4>Hébergeur</h4>
+          <p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis. Site : https://vercel.com</p>
+          <h4>Données personnelles</h4>
+          <p>Ce site ne dépose pas de cookie et ne collecte aucune donnée. Les informations transmises par téléphone ou e-mail servent uniquement au traitement de votre demande et au suivi de votre formation. Conformément à la loi n° 78-17 du 6 janvier 1978 et au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression en écrivant à erzubeyir@icloud.com.</p>
+          <h4>Réclamations</h4>
+          <p>Toute réclamation peut être adressée par e-mail à erzubeyir@icloud.com. Une réponse vous est apportée sous 15 jours. En cas de litige non résolu, vous pouvez saisir gratuitement le médiateur de la consommation CM2C.</p>
+        </div>
+      </details>
+      <details id="cgv">
+        <summary>Conditions générales de vente</summary>
+        <div class="legal">
+          <h4>Modalités de règlement</h4>
+          <p>Le paiement est dû en totalité à réception de la facture émise par l'organisme de formation à destination du bénéficiaire.</p>
+          <h4>Non-réalisation de la prestation</h4>
+          <p>En application de l'article L6354-1 du Code du travail, faute de réalisation totale ou partielle de la prestation de formation, l'organisme rembourse au cocontractant les sommes indûment perçues de ce fait.</p>
+          <h4>Obligations et force majeure</h4>
+          <p>G PROG ACADEMIE est tenue à une obligation de moyens et non de résultat vis-à-vis de ses clients et stagiaires. Elle ne peut être tenue responsable en cas d'inexécution résultant d'un événement fortuit ou de force majeure : maladie ou accident d'un intervenant, grèves ou conflits sociaux externes, désastres naturels, incendies, interruption des télécommunications, de l'énergie ou des transports, ou toute autre circonstance échappant à son contrôle raisonnable.</p>
+          <h4>Devis et attestation</h4>
+          <p>Pour chaque action, un devis est adressé en deux exemplaires au client. Un exemplaire daté, tamponné, signé et revêtu de la mention « Bon pour accord » est retourné par e-mail. Une convention peut être établie entre G PROG ACADEMIE, l'OPCO ou le client. À l'issue de la formation, une attestation est remise au stagiaire. En cas de prise en charge par un OPCO, la feuille d'émargement lui est transmise avec la facture. Une attestation d'assiduité peut être fournie au client sur demande.</p>
+          <h4>Dédit</h4>
+          <p>En cas de renoncement par le bénéficiaire avant le début de la formation : entre 2 semaines et 1 semaine avant, 50 % du coût est dû ; entre 1 semaine et 48 heures avant, 75 % ; moins de 48 heures avant, 100 %. Ce dédommagement ne peut faire l'objet d'une demande de remboursement ou de prise en charge par l'OPCO.</p>
+          <h4>Propriété intellectuelle</h4>
+          <p>Les fiches de présentation, contenus et supports pédagogiques, quelle qu'en soit la forme, sont des œuvres originales protégées. Le client et le stagiaire s'interdisent de les utiliser, transmettre, reproduire ou transformer sans accord exprès de G PROG ACADEMIE, en particulier pour organiser ou animer des formations.</p>
+          <h4>Programme</h4>
+          <p>Les contenus des programmes sont fournis à titre indicatif. Le formateur peut les adapter en fonction de l'actualité, du niveau des participants ou de la dynamique de la session.</p>
+          <h4>Confidentialité</h4>
+          <p>G PROG ACADEMIE, le client et le stagiaire s'engagent à garder confidentiels les documents et informations échangés. Le client accepte d'être cité comme référence, avec une description objective de la prestation.</p>
+          <h4>Données personnelles</h4>
+          <p>Les données du stagiaire sont collectées pour le suivi et la validation de la formation et l'amélioration de l'offre. Il dispose d'un droit d'accès, de modification et de rectification. Les images prises lors des travaux pratiques sont effacées à l'issue des exercices.</p>
+          <h4>Litiges</h4>
+          <p>Le stagiaire consommateur peut recourir gratuitement au médiateur de la consommation CM2C (Centre de la Médiation de la Consommation de Conciliateurs de Justice), 49 rue de Ponthieu, 75008 Paris, 01 89 47 00 14, www.cm2c.net, adhésion valable jusqu'au 5 octobre 2029. À défaut de règlement amiable, le tribunal de Pontoise est seul compétent.</p>
+        </div>
+      </details>
+      <p style="margin-top:16px">© <span id="year">2026</span> G PROG ACADEMIE</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var b=document.getElementById('menu-btn'),n=document.getElementById('nav');
+  b.addEventListener('click',function(){var o=n.classList.toggle('open');b.setAttribute('aria-expanded',o)});
+  n.addEventListener('click',function(e){if(e.target.tagName==='A'){n.classList.remove('open');b.setAttribute('aria-expanded','false')}});
+  function openHash(){var t=document.getElementById(location.hash.slice(1));if(t&&t.tagName==='DETAILS')t.open=true}
+  window.addEventListener('hashchange',openHash);openHash();
+  var f=document.getElementById('calc');
+  if(f){
+    var fmt=function(v){return Math.round(v).toLocaleString('fr-FR')+' €'};
+    var val=function(id){var x=parseFloat(document.getElementById(id).value);return isFinite(x)&&x>=0?x:0};
+    var run=function(){
+      var km=val('c-km'),c=val('c-conso'),sp=val('c-sp'),e=val('c-e85'),o=val('c-over');
+      var a=km/100*c*sp,b=km/100*c*(1+o/100)*e,m=Math.max(a,b,1);
+      var bs=document.getElementById('b-sp'),be=document.getElementById('b-e85');
+      bs.style.width=(a/m*100)+'%';bs.textContent=fmt(a);
+      be.style.width=(b/m*100)+'%';be.textContent=fmt(b);
+      var s=a-b;document.getElementById('c-save').textContent=(s>=0?fmt(s):'– '+fmt(-s))+' / an';
+    };
+    f.addEventListener('input',run);f.addEventListener('submit',function(e){e.preventDefault()});run();
+  }
+  document.getElementById('year').textContent=new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
